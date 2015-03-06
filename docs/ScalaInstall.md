@@ -20,7 +20,7 @@ http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 1. Webブラウザで以下にアクセスする。  
 http://www.scala-sbt.org/release/docs/Getting-Started/Setup.html
-2. sbt 0.13.1 のインストーラをダウンロードする。  
+2. sbt 0.13.7 のインストーラをダウンロードする。  
 sbt.msi
 3. ダウンロードしてきたインストーラを起動し、sbt をインストールする。
 
