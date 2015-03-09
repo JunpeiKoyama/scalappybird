@@ -85,14 +85,18 @@ export ANDROID_HOME=$HOME/ (DIR) /adt-bundle-linux-x86_64-20140321/sdk/
 2. Android Virtual Devices から起動したい AVD を選択して Start をクリックする。
 3. エミュレータウィンドウが開いてしばらく待つと Android の初期画面が表示されます。
 
-## JDKのインストール
+### その他の Android エミュレータ
 
-JDKの7以下のバージョンが必要です。Java8しか無い方は別途Java7をインストールし、JAVA_HOMEにインストール先のディレクトリを指定します。
+[Genymotion](https://www.genymotion.com/) という Android エミュレータは非常に高速に動作します。
+Genymotion を使うためには、その前に [VirtualBox](https://www.virtualbox.org/) をインストールする必要があります。
 
-### Macの場合
+### Android 実機の使用
 
-Macは標準でJava6がインストールされているので、それを使うことができます。
+エミュレータではなく Android 実機を使って開発をすることもできます。
 
-```
-export JAVA_HOME=/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
-```
+* 端末側の設定
+端末の設定画面を開き、「端末情報」 を選択し、「ビルド番号」を7回連続でタップします。
+端末の設定画面に表示される「開発者オプション」で「USBデバッグ」を有効にします。
+
+* PC側の設定
+SDK Manager で Google USB manager をインストールします。

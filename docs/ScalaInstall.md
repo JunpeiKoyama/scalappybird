@@ -2,7 +2,7 @@
 
 Scala 開発を行うために以下をインストールします。
 
-1. JDK (Java Development Kit)
+1. JDK (Java Development Kit) Java7
 2. SBT (Simple Build Tool)
 
 ## Windows
