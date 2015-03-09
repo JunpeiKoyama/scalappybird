@@ -22,7 +22,7 @@ object GameObject {
 
 class Bird(p: Point) extends GameObject {
 
-  var img : Bitmap = null;
+  var imgOpt : Option[Bitmap] = None;
   var point: Point = p
   var speed: Int = 10
   val upOffset: Int = -200
@@ -30,7 +30,7 @@ class Bird(p: Point) extends GameObject {
 
   def initialize(c: Context) = {
     val res:Resources = c.getResources
-    img = BitmapFactory.decodeResource(res, R.drawable.bird)
+    imgOpt = Option(BitmapFactory.decodeResource(res, R.drawable.bird))
   }
 
   def update() {
@@ -49,7 +49,9 @@ class Bird(p: Point) extends GameObject {
   def draw(g: Canvas) {
     val p = new Paint
     if (enable){
-     g drawBitmap(img, point.x, point.y, p)
+      imgOpt foreach { img => 
+        g drawBitmap(img, point.x, point.y, p)
+      }
     } else {
        val gamePaint = new Paint
       gamePaint.setARGB(255, 255, 0, 0)
@@ -69,18 +71,20 @@ trait StaticGameObject extends GameObject {
   
   def point: Point
   def resourceId: Int
-  var img: Bitmap = null
-  lazy val width: Int = img.getWidth
-  lazy val height: Int = img.getHeight
+  var imgOpt: Option[Bitmap] = None
+  lazy val width: Int = imgOpt.map(_.getWidth).getOrElse(0)
+  lazy val height: Int = imgOpt.map(_.getHeight).getOrElse(0)
   
   def initialize(c: Context) = {
     val res:Resources = c.getResources
-    img = BitmapFactory.decodeResource(res, resourceId)
+    imgOpt = Option(BitmapFactory.decodeResource(res, resourceId))
   }
   def update() {}
   def draw(g: Canvas) {
     val p = new Paint
-    g drawBitmap(img, point.x, point.y, p)
+    imgOpt foreach { img =>
+      g drawBitmap(img, point.x, point.y, p)
+    }
   }
 }
 
@@ -101,7 +105,9 @@ trait PaddingWidthStaticGameObject extends StaticGameObject {
   override def draw(g: Canvas) {
     val p = new Paint
     (0 to GameObject.canvasWidth / width) foreach {i => 
-      g drawBitmap(img, point.x + i * width, point.y, p)
+      imgOpt foreach { img =>
+        g drawBitmap(img, point.x + i * width, point.y, p)
+      }
     }
   }
 }
@@ -125,7 +131,7 @@ class Sky(p: Point) extends PaddingWidthStaticGameObject {
 class MainThread(holder: SurfaceHolder, context: Context) extends Thread {
 
   // initialize
-  var gameObjects : List[GameObject] = {
+  val gameObjects : List[GameObject] = {
     List(new Sky(Point(0,900-109)),
          new Land(Point(0,900)),
          new PipeUp(Point(500,760)),
@@ -175,7 +181,7 @@ class MainThread(holder: SurfaceHolder, context: Context) extends Thread {
   } 
 
   def withCanvas(f: Canvas => Unit) {
-    val canvas = holder.lockCanvas(null)
+    val canvas = holder.lockCanvas()
     try {
       f(canvas)
     } finally {
