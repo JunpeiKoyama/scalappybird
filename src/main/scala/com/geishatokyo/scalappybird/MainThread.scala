@@ -153,15 +153,37 @@ trait StaticGameObject extends GameObject {
 
 class PipeUp(p: Point) extends StaticGameObject {
   val point: Point = p
+  val startX: Int = p.x
   val resourceId: Int = R.drawable.pipeup
   override def update() {
+    Game.stage match {
+      case Game.Stage.Start => {
+        point.x = startX
+      }
+      case Game.Stage.Main => {
+        point.x = if (point.x > 0) point.x - 10 else GameObject.canvasWidth
+      }
+      case Game.Stage.End => {}
+    }
     point.y = GameObject.canvasHeight - height
   }
 }
 
 class PipeDown(p: Point) extends StaticGameObject {
   val point: Point = p
+  val startX: Int = p.x
   val resourceId: Int = R.drawable.pipedown  
+  override def update() {
+    Game.stage match {
+      case Game.Stage.Start => {
+        point.x = startX
+      }
+      case Game.Stage.Main => {
+        point.x = if (point.x > 0) point.x - 10 else GameObject.canvasWidth
+      }
+      case Game.Stage.End => {}
+    }
+  }
 }
 
 trait PaddingWidthStaticGameObject extends StaticGameObject {
@@ -197,8 +219,8 @@ class MainThread(holder: SurfaceHolder, context: Context) extends Thread {
   val gameObjects : List[GameObject] = {
     List(new Sky(Point(0,900-109)),
          new Land(Point(0,900)),
-         new PipeUp(Point(500,760)),
-         new PipeDown(Point(300,0)),
+         new PipeUp(Point(700,760)),
+         new PipeDown(Point(500,0)),
          new Bird(Point(100,0)),
          new Timer())
   }
