@@ -8,6 +8,15 @@ import android.graphics.{Canvas, Paint, Rect, Path, Bitmap, BitmapFactory}
 
 case class Point(var x: Int, var y: Int)
 
+object Game {
+  sealed abstract class Stage
+  object Stage {
+    case object Main extends Stage
+    case object End extends Stage
+  }
+  var stage: Stage = Stage.Main
+}
+
 trait GameObject {
   def initialize(c: Context)
   def update() 
@@ -20,13 +29,49 @@ object GameObject {
   var canvasHeight: Int = _  
 }
 
+class Timer extends GameObject {
+  var startTime = System.currentTimeMillis
+  var timer:Long = 0
+  val timerPaint = new Paint
+  timerPaint.setARGB(255, 0, 0, 255)
+  timerPaint.setTextSize(64)
+  val gamePaint = new Paint
+  gamePaint.setARGB(255, 255, 0, 0)
+  gamePaint.setTextSize(64)
+
+  def initialize(c: Context) = {
+  }
+
+  def update() {
+    Game.stage match {
+      case Game.Stage.Main => {
+        timer = (System.currentTimeMillis - startTime)/1000
+      }
+      case Game.Stage.End => {
+        startTime = System.currentTimeMillis
+      }
+    }
+  }
+    
+  def draw(g: Canvas) {
+    Game.stage match {
+      case Game.Stage.Main => {
+        g drawText (timer toString, GameObject.canvasWidth - 150, 100, timerPaint)
+      }
+      case Game.Stage.End => {
+        g drawText (timer toString, GameObject.canvasWidth - 150, 100, timerPaint)
+        g drawText ("Game End", 250, GameObject.canvasHeight/2-32, gamePaint)
+      }
+    }
+  }
+}
+
 class Bird(p: Point) extends GameObject {
 
   var imgOpt : Option[Bitmap] = None;
   var point: Point = p
-  var speed: Int = 10
+  var speed: Int = 20
   val upOffset: Int = -200
-  var enable: Boolean = true
 
   def initialize(c: Context) = {
     val res:Resources = c.getResources
@@ -34,36 +79,40 @@ class Bird(p: Point) extends GameObject {
   }
 
   def update() {
-    
     // falling
-    if (enable){
+    if (Game.stage == Game.Stage.Main){
       point.y = point.y + speed
+      // timer = (System.currentTimeMillis - startTime) / 1000
     }
 
     // dead or alive
     if(point.y >= GameObject.canvasHeight) {
-      enable = false
+      Game.stage = Game.Stage.End
     }
   }
 
   def draw(g: Canvas) {
     val p = new Paint
-    if (enable){
-      imgOpt foreach { img => 
-        g drawBitmap(img, point.x, point.y, p)
+    Game.stage match {
+      case Game.Stage.Main => {
+        imgOpt foreach { img => 
+          g drawBitmap(img, point.x, point.y, p)
+        }
       }
-    } else {
-       val gamePaint = new Paint
-      gamePaint.setARGB(255, 255, 0, 0)
-      gamePaint.setTextSize(64)
-      g drawText ("Game End", 250, GameObject.canvasHeight/2-32, gamePaint)     
+      case Game.Stage.End => {
+      }
     }
   }
 
   override def touchEvent(x: Int, y: Int) = {
-    if (enable){
-      point.y = point.y + upOffset
-    }    
+    Game.stage match {
+      case Game.Stage.Main => {
+        point.y = point.y + upOffset
+      }
+      case Game.Stage.End => {
+        point.y = 0
+      }
+    }
   }
 }
 
@@ -136,7 +185,8 @@ class MainThread(holder: SurfaceHolder, context: Context) extends Thread {
          new Land(Point(0,900)),
          new PipeUp(Point(500,760)),
          new PipeDown(Point(300,0)),
-         new Bird(Point(100,0)))
+         new Bird(Point(100,0)),
+         new Timer())
   }
   gameObjects.foreach(_.initialize(context))
 
