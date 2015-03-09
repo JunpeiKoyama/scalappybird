@@ -11,10 +11,11 @@ case class Point(var x: Int, var y: Int)
 object Game {
   sealed abstract class Stage
   object Stage {
+    case object Start extends Stage
     case object Main extends Stage
     case object End extends Stage
   }
-  var stage: Stage = Stage.Main
+  var stage: Stage = Stage.Start
 }
 
 trait GameObject {
@@ -44,23 +45,30 @@ class Timer extends GameObject {
 
   def update() {
     Game.stage match {
+      case Game.Stage.Start => {
+        startTime = System.currentTimeMillis
+      }
       case Game.Stage.Main => {
         timer = (System.currentTimeMillis - startTime)/1000
       }
       case Game.Stage.End => {
-        startTime = System.currentTimeMillis
       }
     }
   }
     
   def draw(g: Canvas) {
     Game.stage match {
+      case Game.Stage.Start => {
+        g drawText ("Scalappy Bird", 250, GameObject.canvasHeight/2-32, gamePaint)
+        g drawText ("Tap to Start!!", 250, GameObject.canvasHeight/2+32, gamePaint)
+      }
       case Game.Stage.Main => {
         g drawText (timer toString, GameObject.canvasWidth - 150, 100, timerPaint)
       }
       case Game.Stage.End => {
         g drawText (timer toString, GameObject.canvasWidth - 150, 100, timerPaint)
         g drawText ("Game End", 250, GameObject.canvasHeight/2-32, gamePaint)
+        g drawText ("Tap to Restart!!", 250, GameObject.canvasHeight/2+32, gamePaint)
       }
     }
   }
@@ -94,6 +102,8 @@ class Bird(p: Point) extends GameObject {
   def draw(g: Canvas) {
     val p = new Paint
     Game.stage match {
+      case Game.Stage.Start => {
+      }
       case Game.Stage.Main => {
         imgOpt foreach { img => 
           g drawBitmap(img, point.x, point.y, p)
@@ -106,11 +116,15 @@ class Bird(p: Point) extends GameObject {
 
   override def touchEvent(x: Int, y: Int) = {
     Game.stage match {
+      case Game.Stage.Start => {
+        Game.stage = Game.Stage.Main
+      }
       case Game.Stage.Main => {
         point.y = point.y + upOffset
       }
       case Game.Stage.End => {
         point.y = 0
+        Game.stage = Game.Stage.Start
       }
     }
   }
